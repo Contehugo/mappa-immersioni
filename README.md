@@ -31,16 +31,13 @@
                         var lat = parseFloat(row.Latitudine.replace(',', '.'));
                         var lng = parseFloat(row.Longitudine.replace(',', '.'));
                         
-                        // Pulizia link Google Drive per renderlo visualizzabile
+                        // Prendiamo il link esattamente come è scritto nel foglio
                         var fotoUrl = row.Foto || "";
-                        if (fotoUrl.includes("drive.google.com")) {
-                            fotoUrl = fotoUrl.replace("file/d/", "uc?export=view&id=").replace("/view?usp=sharing", "").replace("/view", "");
-                        }
 
-                        // Creazione del contenuto del popup con l'immagine
+                        // Creazione popup: se c'è una foto, la mostra
                         var popupContent = "<b>" + row.Nome + "</b><br>" + row.Descrizione;
                         if (fotoUrl !== "") {
-                            popupContent += "<img src='" + fotoUrl + "' class='popup-img' onerror='this.style.display=\"none\"'>";
+                            popupContent += "<br><img src='" + fotoUrl + "' style='width:200px; border-radius:8px; margin-top:5px;'>";
                         }
 
                         L.marker([lat, lng]).addTo(map).bindPopup(popupContent);
