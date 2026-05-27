@@ -4,20 +4,21 @@
     <meta charset="UTF-8">
     <title>Mappa con Ricerca</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     
     <style>
         body, html { height: 100%; margin: 0; padding: 0; overflow: hidden; }
         #map { height: 100vh; width: 100vw; }
         .popup-img { width: 200px; height: auto; border-radius: 8px; margin-top: 5px; display: block; }
+        /* Forza la visibilità della barra di ricerca */
+        .leaflet-control-search { background: white; padding: 5px; border-radius: 5px; }
     </style>
 </head>
 <body>
     <div id="map"></div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
     <script>
         var map = L.map('map').setView([43.55, 10.31], 8);
@@ -25,7 +26,6 @@
 
         var csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWKciLxTbcrogqHG8a4vZgNZmSR0ft_V-clBv3u3-q4Ock9FYC-Yk4P80AaX1BE7mkwCJCjNwgIJkz/pub?gid=0&single=true&output=csv';
         
-        // Layer che conterrà tutti i marker per la ricerca
         var markersLayer = new L.LayerGroup();
         map.addLayer(markersLayer);
 
@@ -39,7 +39,7 @@
                     var lng = row.Longitudine ? parseFloat(row.Longitudine.replace(',', '.')) : null;
                     
                     if (lat && lng) {
-                        var marker = L.marker([lat, lng], {title: row.Nome}); // 'title' serve alla ricerca
+                        var marker = L.marker([lat, lng], {title: row.Nome}); 
                         
                         var popupContent = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
                         if (row.Foto && row.Foto.trim() !== "") {
@@ -51,7 +51,7 @@
                     }
                 });
                 
-                // Aggiungiamo la barra di ricerca dopo aver caricato i marker
+                // Controllo ricerca
                 map.addControl(new L.Control.Search({
                     layer: markersLayer,
                     initial: false,
