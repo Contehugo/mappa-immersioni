@@ -2,16 +2,14 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Mappa Immersione con Foto</title>
+    <title>Mappa Immersione Finale</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         body, html { height: 100%; margin: 0; padding: 0; overflow: hidden; }
         #map { height: 100vh; width: 100vw; }
-        /* Stile per rendere l'immagine bella nel popup */
-        .popup-img { width: 100%; max-width: 200px; height: auto; border-radius: 8px; margin-top: 10px; display: block; }
-        .leaflet-popup-content { width: 220px !important; font-family: sans-serif; }
+        .popup-img { width: 200px; height: auto; border-radius: 8px; margin-top: 5px; display: block; }
     </style>
 </head>
 <body>
@@ -25,19 +23,22 @@
         Papa.parse(csvUrl, {
             download: true,
             header: true,
+            skipEmptyLines: true,
             complete: function(results) {
                 results.data.forEach(function(row) {
-                    if (row.Latitudine && row.Longitudine) {
-                        var lat = parseFloat(row.Latitudine.replace(',', '.'));
-                        var lng = parseFloat(row.Longitudine.replace(',', '.'));
-                        
-                        // Prendiamo il link esattamente come è scritto nel foglio
-                        var fotoUrl = row.Foto || "";
+                    // Pulizia nomi colonne: cerchiamo la colonna Foto ignorando spazi extra
+                    var lat = row.Latitudine ? parseFloat(row.Latitudine.replace(',', '.')) : null;
+                    var lng = row.Longitudine ? parseFloat(row.Longitudine.replace(',', '.')) : null;
+                    
+                    // Cerchiamo la chiave 'Foto' anche se ci fossero spazi nel CSV
+                    var fotoKey = Object.keys(row).find(key => key.trim() === 'Foto');
+                    var fotoUrl = fotoKey ? row[fotoKey] : "";
 
-                        // Creazione popup: se c'è una foto, la mostra
-                        var popupContent = "<b>" + row.Nome + "</b><br>" + row.Descrizione;
-                        if (fotoUrl !== "") {
-                            popupContent += "<br><img src='" + fotoUrl + "' style='width:200px; border-radius:8px; margin-top:5px;'>";
+                    if (lat && lng) {
+                        var popupContent = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
+                        
+                        if (fotoUrl && fotoUrl.trim() !== "") {
+                            popupContent += "<br><img src='" + fotoUrl.trim() + "' class='popup-img' onerror='this.style.display=\"none\"'>";
                         }
 
                         L.marker([lat, lng]).addTo(map).bindPopup(popupContent);
