@@ -46,7 +46,6 @@
                                 })
                             });
                         } else {
-                            // Pallino blu di fallback
                             marker = L.marker([lat, lng]);
                         }
                         
@@ -56,10 +55,10 @@
                         }
                         marker.bindPopup(popup);
                         markersLayer.addLayer(marker);
-                    }
-                });
-            }
-        });
+                    } // Fine if lat && lng
+                }); // Fine forEach
+            } // Fine complete
+        }); // Fine Papa.parse
     </script>
 </body>
 </html>
