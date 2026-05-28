@@ -10,14 +10,14 @@
         #map { height: 100vh; width: 100vw; }
         .popup-img { width: 200px; height: auto; border-radius: 8px; margin-top: 5px; }
         /* Pin personalizzato: un pallino blu senza bordi bianchi */
-        .my-custom-pin {
-            background-color: #007bff;
-            border: 2px solid white;
-            border-radius: 50%;
-            width: 15px !important;
-            height: 15px !important;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
-        }
+      // Dentro il ciclo forEach, invece di 'my-custom-pin', faremo così:
+var iconaPersonalizzata = L.icon({
+    iconUrl: row.IconaURL, // Legge l'URL dal foglio
+    iconSize: [30, 30],    // Dimensione dell'icona (puoi modificarla)
+    iconAnchor: [15, 15]   // Punto centrale
+});
+
+var marker = L.marker([lat, lng], {icon: iconaPersonalizzata, title: row.Nome});
     </style>
 </head>
 <body>
