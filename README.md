@@ -14,36 +14,63 @@
 </head>
 <body>
     <div id="map"></div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
     <script>
         var map = L.map('map').setView([43.55, 10.31], 8);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(map);
+
         var markersLayer = new L.LayerGroup();
         map.addLayer(markersLayer);
-        map.addControl(new L.Control.Search({layer: markersLayer, initial: false, zoom: 12}));
+
+        var searchControl = new L.Control.Search({
+            layer: markersLayer,
+            initial: false,
+            zoom: 12,
+            textPlaceholder: 'Cerca...'
+        });
+        map.addControl(searchControl);
 
         var csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWKciLxTbcrogqHG8a4vZgNZmSR0ft_V-clBv3u3-q4Ock9FYC-Yk4P80AaX1BE7mkwCJCjNwgIJkz/pub?gid=0&single=true&output=csv';
 
         Papa.parse(csvUrl, {
-            download: true, header: true, skipEmptyLines: true,
+            download: true,
+            header: true,
+            skipEmptyLines: true,
             complete: function(results) {
                 results.data.forEach(function(row) {
-                    var lat = parseFloat(row.Latitudine.replace(',', '.'));
-                    var lng = parseFloat(row.Longitudine.replace(',', '.'));
-                    if (isNaN(lat) || isNaN(lng)) return;
-
-                    var marker;
-                    if (row.IconaURL && row.IconaURL.trim().length > 10) {
-                        marker = L.marker([lat, lng], {
-                            icon: L.icon({iconUrl: row.IconaURL.trim(), iconSize: [40, 40], iconAnchor: [20, 20]})
-                        });
-                    } else {
-                        marker = L.marker([lat, lng], {icon: L.divIcon({className: 'my-custom-pin', iconSize: [15, 15]})});
+                    var lat = row.Latitudine ? parseFloat(row.Latitudine.replace(',', '.')) : null;
+                    var lng = row.Longitudine ? parseFloat(row.Longitudine.replace(',', '.')) : null;
+                    
+                    if (lat && lng) {
+                        var marker;
+                        if (row.IconaURL && row.IconaURL.trim().length > 10) {
+                            marker = L.marker([lat, lng], {
+                                icon: L.icon({
+                                    iconUrl: row.IconaURL.trim(),
+                                    iconSize: [40, 40],
+                                    iconAnchor: [20, 20]
+                                })
+                            });
+                        } else {
+                            marker = L.marker([lat, lng], {
+                                icon: L.divIcon({className: 'my-custom-pin', iconSize: [15, 15]})
+                            });
+                        }
+                        
+                        var popupContent = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
+                        if (row.Foto && row.Foto.trim() !== "") {
+                            popupContent += "<br><img src='" + row.Foto.trim() + "' class='popup-img'>";
+                        }
+                        marker.bindPopup(popupContent);
+                        markersLayer.addLayer(marker);
                     }
-                    marker.bindPopup("<b>" + row.Nome + "</b>" + (row.Foto ? "<br><img src='"+row.Foto+"' class='popup-img'>" : ""));
-                    markersLayer.addLayer(marker);
                 });
             }
         });
