@@ -39,31 +39,48 @@
 
         var csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWKciLxTbcrogqHG8a4vZgNZmSR0ft_V-clBv3u3-q4Ock9FYC-Yk4P80AaX1BE7mkwCJCjNwgIJkz/pub?gid=0&single=true&output=csv';
 
-       Papa.parse(csvUrl, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                results.data.forEach(function(row) {
-                    var lat = row.Latitudine ? parseFloat(row.Latitudine.replace(',', '.')) : null;
-                    var lng = row.Longitudine ? parseFloat(row.Longitudine.replace(',', '.')) : null;
-                    
-                    if (lat && lng) {
-                        var marker;
-                        // Nota: ho cambiato row.IconaURL con row.Icona
-                        if (row.Icona && row.Icona.trim().length > 5) {
-                            marker = L.marker([lat, lng], {
-                                icon: L.icon({
-                                    iconUrl: row.Icona.trim(),
-                                    iconSize: [40, 40],
-                                    iconAnchor: [20, 20]
-                                })
-                            });
-                        } else {
-                            marker = L.marker([lat, lng], {
-                                icon: L.divIcon({className: 'my-custom-pin', iconSize: [15, 15]})
-                            });
-                        }
+      Papa.parse(csvUrl, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+        results.data.forEach(function(row) {
+            // DEBUG: Controlliamo cosa sta leggendo
+            console.log("Riga letta:", row);
+
+            var lat = row.Latitudine ? parseFloat(row.Latitudine.replace(',', '.')) : null;
+            var lng = row.Longitudine ? parseFloat(row.Longitudine.replace(',', '.')) : null;
+            
+            if (lat && lng) {
+                var marker;
+                // Usiamo il nome esatto della tua colonna "Icona"
+                var urlIcona = row.Icona ? row.Icona.trim() : "";
+                
+                if (urlIcona !== "") {
+                    marker = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: urlIcona,
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
+                        })
+                    });
+                } else {
+                    marker = L.marker([lat, lng], {
+                        icon: L.divIcon({className: 'my-custom-pin', iconSize: [15, 15]})
+                    });
+                }
+                
+                // Creazione popup con i nomi delle colonne esatti
+                var popupContent = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "Nessuna descrizione");
+                if (row.Foto && row.Foto.trim() !== "") {
+                    popupContent += "<br><img src='" + row.Foto.trim() + "' class='popup-img'>";
+                }
+                marker.bindPopup(popupContent);
+                markersLayer.addLayer(marker);
+            }
+        });
+    }
+});
                         
                         // Creazione popup con Descrizione
                         var popupContent = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
