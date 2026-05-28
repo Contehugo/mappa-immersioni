@@ -10,6 +10,12 @@
         #map { height: 100vh; width: 100vw; }
         .popup-img { width: 200px; height: auto; border-radius: 8px; margin-top: 5px; }
     </style>
+    /* Rimuove lo sfondo bianco e i bordi dai marker personalizzati */
+.leaflet-marker-icon {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
 </head>
 <body>
     <div id="map"></div>
