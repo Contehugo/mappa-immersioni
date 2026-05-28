@@ -71,4 +71,14 @@
                         
                         var popupContent = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
                         if (row.Foto && row.Foto.trim() !== "") {
-                            popup
+                            popupContent += "<br><img src='" + row.Foto.trim() + "' class='popup-img'>";
+                        }
+                        marker.bindPopup(popupContent);
+                        markersLayer.addLayer(marker);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
