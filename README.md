@@ -39,7 +39,7 @@
 
         var csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWKciLxTbcrogqHG8a4vZgNZmSR0ft_V-clBv3u3-q4Ock9FYC-Yk4P80AaX1BE7mkwCJCjNwgIJkz/pub?gid=0&single=true&output=csv';
 
-        Papa.parse(csvUrl, {
+       Papa.parse(csvUrl, {
             download: true,
             header: true,
             skipEmptyLines: true,
@@ -50,10 +50,11 @@
                     
                     if (lat && lng) {
                         var marker;
-                        if (row.IconaURL && row.IconaURL.trim().length > 10) {
+                        // Nota: ho cambiato row.IconaURL con row.Icona
+                        if (row.Icona && row.Icona.trim().length > 5) {
                             marker = L.marker([lat, lng], {
                                 icon: L.icon({
-                                    iconUrl: row.IconaURL.trim(),
+                                    iconUrl: row.Icona.trim(),
                                     iconSize: [40, 40],
                                     iconAnchor: [20, 20]
                                 })
@@ -63,6 +64,18 @@
                                 icon: L.divIcon({className: 'my-custom-pin', iconSize: [15, 15]})
                             });
                         }
+                        
+                        // Creazione popup con Descrizione
+                        var popupContent = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
+                        if (row.Foto && row.Foto.trim() !== "") {
+                            popupContent += "<br><img src='" + row.Foto.trim() + "' class='popup-img'>";
+                        }
+                        marker.bindPopup(popupContent);
+                        markersLayer.addLayer(marker);
+                    }
+                });
+            }
+        });
                         
                         var popupContent = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
                         if (row.Foto && row.Foto.trim() !== "") {
