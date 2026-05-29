@@ -46,7 +46,7 @@
 
         var csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWKciLxTbcrogqHG8a4vZgNZmSR0ft_V-clBv3u3-q4Ock9FYC-Yk4P80AaX1BE7mkwCJCjNwgIJkz/pub?gid=0&single=true&output=csv';
 
-        Papa.parse(csvUrl, {
+       Papa.parse(csvUrl, {
             download: true,
             header: true,
             skipEmptyLines: true,
@@ -56,15 +56,15 @@
                     var lng = row.Longitudine ? parseFloat(row.Longitudine.replace(',', '.')) : null;
                     
                     if (lat && lng) {
-                        var marker = L.marker([lat, lng], {
-                            title: row.Nome, // Questo serve alla lente per cercare
-                            icon: (row.Icona && row.Icona.trim() !== "") ? 
-                                  L.icon({iconUrl: row.Icona.trim(), iconSize: [40, 40], iconAnchor: [20, 20]}) : 
-                                  new L.Icon.Default()
-                        });
+                        // Creiamo l'icona
+                        var myIcon = (row.Icona && row.Icona.trim() !== "") ? 
+                                     L.icon({iconUrl: row.Icona.trim(), iconSize: [40, 40], iconAnchor: [20, 20]}) : 
+                                     new L.Icon.Default();
+
+                        var marker = L.marker([lat, lng], {icon: myIcon});
                         
-                        // Aggiungiamo una proprietà 'nome' al marker per la ricerca
-                        marker.nome = row.Nome;
+                        // IMPORTANTE: Assegniamo il nome qui in modo che la lente lo legga
+                        marker.name = row.Nome; 
                         
                         var popup = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
                         if (row.Foto && row.Foto.trim() !== "") {
@@ -76,6 +76,9 @@
                 });
             }
         });
+
+        // Configurazione forzata della lente DOPO che i dati sono stati caricati
+        searchControl.options.propertyName = 'name';
     </script>
 </body>
 </html>
