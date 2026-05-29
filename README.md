@@ -10,10 +10,10 @@
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
         .popup-img { width: 200px; height: auto; border-radius: 8px; margin-top: 5px; }
         
-        /* Forza la trasparenza delle icone */
+        /* Trasparenza icone */
         .leaflet-marker-icon { background: transparent !important; border: none !important; box-shadow: none !important; }
         
-        /* Migliora la visibilità della barra di ricerca */
+        /* Stile barra di ricerca */
         .leaflet-control-search .search-input { border: 1px solid #ccc; }
     </style>
 </head>
@@ -34,19 +34,19 @@
         var markersLayer = new L.LayerGroup();
         map.addLayer(markersLayer);
 
-        // CONFIGURAZIONE CERCA
+        // Inizializzazione Ricerca
         var searchControl = new L.Control.Search({
             layer: markersLayer,
             initial: false,
             zoom: 12,
-            propertyName: 'nome', // Assicurati che questo corrisponda al nome nel marker
+            propertyName: 'title', 
             textPlaceholder: 'Cerca per nome...'
         });
         map.addControl(searchControl);
 
         var csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWKciLxTbcrogqHG8a4vZgNZmSR0ft_V-clBv3u3-q4Ock9FYC-Yk4P80AaX1BE7mkwCJCjNwgIJkz/pub?gid=0&single=true&output=csv';
 
-       Papa.parse(csvUrl, {
+        Papa.parse(csvUrl, {
             download: true,
             header: true,
             skipEmptyLines: true,
@@ -56,15 +56,15 @@
                     var lng = row.Longitudine ? parseFloat(row.Longitudine.replace(',', '.')) : null;
                     
                     if (lat && lng) {
-                        // Creiamo l'icona
                         var myIcon = (row.Icona && row.Icona.trim() !== "") ? 
                                      L.icon({iconUrl: row.Icona.trim(), iconSize: [40, 40], iconAnchor: [20, 20]}) : 
                                      new L.Icon.Default();
 
-                        var marker = L.marker([lat, lng], {icon: myIcon});
-                        
-                        // IMPORTANTE: Assegniamo il nome qui in modo che la lente lo legga
-                        marker.name = row.Nome; 
+                        // Il 'title' permette alla lente di cercare il nome correttamente
+                        var marker = L.marker([lat, lng], {
+                            icon: myIcon,
+                            title: row.Nome || "Senza nome"
+                        });
                         
                         var popup = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + (row.Descrizione || "");
                         if (row.Foto && row.Foto.trim() !== "") {
@@ -76,9 +76,6 @@
                 });
             }
         });
-
-        // Configurazione forzata della lente DOPO che i dati sono stati caricati
-        searchControl.options.propertyName = 'name';
     </script>
 </body>
 </html>
