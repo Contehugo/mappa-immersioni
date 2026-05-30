@@ -22,9 +22,7 @@
         <select id="categoryFilter" onchange="filterMarkers()">
             <option value="Tutto">Tutto</option>
             <option value="Animali">Animali</option>
-            <option value="Top10">Top 10</option>
-            <option value="Relitti">Relitti</option>
-            <option value="Grotte">Grotte</option>
+           
         </select>
     </div>
 
