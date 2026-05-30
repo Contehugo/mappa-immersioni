@@ -10,26 +10,43 @@
         #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
         .popup-img { width: 200px; height: auto; border-radius: 8px; margin-top: 5px; }
         .leaflet-marker-icon { background: transparent !important; border: none !important; box-shadow: none !important; }
-        .leaflet-control-search .search-input { border: 1px solid #ccc; }
+        
+        /* Stile menu filtro */
+        .filter-container { position: absolute; top: 10px; right: 50px; z-index: 1000; background: white; padding: 5px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
     <div id="map"></div>
+
+    <div class="filter-container">
+        <select id="categoryFilter" onchange="filterMarkers()">
+            <option value="Tutto">Tutto</option>
+            <option value="Animali">Animali</option>
+            <option value="Top10">Top 10</option>
+            <option value="Relitti">Relitti</option>
+            <option value="Grotte">Grotte</option>
+        </select>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-search@3.0.9/dist/leaflet-search.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
     <script>
         var map = L.map('map').setView([43.55, 10.31], 8);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+        
         var markersLayer = new L.LayerGroup();
         map.addLayer(markersLayer);
+
+        var allMarkers = []; // Array per salvare tutti i marker
 
         var searchControl = new L.Control.Search({
             layer: markersLayer,
             initial: false,
             zoom: 12,
-            propertyName: 'title', 
-            textPlaceholder: 'Cerca (nome scientifico o comune)...'
+            propertyName: 'title',
+            textPlaceholder: 'Cerca...'
         });
         map.addControl(searchControl);
 
@@ -46,16 +63,13 @@
                                      L.icon({iconUrl: row.Icona.trim(), iconSize: [40, 40], iconAnchor: [20, 20]}) : 
                                      new L.Icon.Default();
 
-                        // Uniamo Nome e NomeComune per la ricerca
                         var nomeDaCercare = row.Nome || "Senza nome";
                         if (row.nomecomune && row.nomecomune.trim() !== "") {
                             nomeDaCercare += " (" + row.nomecomune.trim() + ")";
                         }
 
-                        var marker = L.marker([lat, lng], {
-                            icon: myIcon,
-                            title: nomeDaCercare
-                        });
+                        var marker = L.marker([lat, lng], {icon: myIcon, title: nomeDaCercare});
+                        marker.category = row.Categoria || ""; // Salviamo la categoria nel marker
                         
                         var popup = "<b>" + (row.Nome || "Senza nome") + "</b><br>" + 
                                     (row.nomecomune ? "<i>" + row.nomecomune + "</i><br>" : "") + 
@@ -64,11 +78,24 @@
                             popup += "<br><img src='" + row.Foto.trim() + "' class='popup-img'>";
                         }
                         marker.bindPopup(popup);
+                        
+                        allMarkers.push(marker); // Aggiungiamo alla nostra lista
                         markersLayer.addLayer(marker);
                     }
                 });
             }
         });
+
+        // Funzione di filtraggio
+        function filterMarkers() {
+            var selected = document.getElementById("categoryFilter").value;
+            markersLayer.clearLayers();
+            allMarkers.forEach(function(marker) {
+                if (selected === "Tutto" || marker.category === selected) {
+                    markersLayer.addLayer(marker);
+                }
+            });
+        }
     </script>
 </body>
 </html>
